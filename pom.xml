@@ -48,7 +48,7 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
-                <mainClass>main.java.com.payitearly.PayItEarlyApplication</mainClass>
+                <mainClass>com.payitearly.PayItEarlyApplication</mainClass>
             	</configuration>
 			</plugin>
 		</plugins>

@@ -1,4 +1,4 @@
-package main.java.com.payitearly.models;
+package com.payitearly.models;
 
 public class LoanRequest {
     private double principal;

@@ -1,4 +1,4 @@
-package main.java.com.payitearly.services;
+package com.payitearly.services;
 import org.springframework.stereotype.Service;
 
 @Service
