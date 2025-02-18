@@ -1,1 +1,2 @@
-web: java -jar target/pay-it-early-0.0.1-SNAPSHOT.jar
+web: docker build -t pay-it-early . && docker run -p 8080:8080 pay-it-early
+
