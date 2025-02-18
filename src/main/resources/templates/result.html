@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Calculation Results</title>
+    <script>
+        function downloadResults() {
+            const element = document.createElement('a');
+            const text = `Loan Calculation Result\nOriginal Monthly Payment: $${document.getElementById('monthlyPayment').innerText}\nNew Monthly Payment: $${document.getElementById('newMonthlyPayment').innerText}\nTotal Interest Saved: $${document.getElementById('totalInterestSaved').innerText}`;
+            const file = new Blob([text], { type: 'text/plain' });
+            element.href = URL.createObjectURL(file);
+            element.download = 'loan_results.txt';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+        }
+    </script>
+</head>
+<body>
+    <h2>Loan Calculation Result</h2>
+    <p>Original Monthly Payment: $<span id="monthlyPayment" th:text="${monthlyPayment}"></span></p>
+    <p>New Monthly Payment: $<span id="newMonthlyPayment" th:text="${newMonthlyPayment}"></span></p>
+    <p>Total Interest Saved: $<span id="totalInterestSaved" th:text="${totalInterestSaved}"></span></p>
+    <button onclick="downloadResults()">Download Results</button>
+    <a href="/">Back</a>
+</body>
+</html>

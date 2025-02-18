@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pay It Early - Loan Calculator</title>
+</head>
+<body>
+    <h2>Loan Calculator</h2>
+    <form action="/calculate" method="post">
+        <label>Principal Amount:</label>
+        <input type="number" name="principal" required>
+        <br>
+        <label>Interest Rate (%):</label>
+        <input type="number" name="interestRate" step="0.01" required>
+        <br>
+        <label>Months Left:</label>
+        <input type="number" name="monthsLeft" required>
+        <br>
+        <label>Extra Monthly Payment:</label>
+        <input type="number" name="extraPayment" step="0.01">
+        <br>
+        <button type="submit">Calculate</button>
+    </form>
+</body>
+</html>
