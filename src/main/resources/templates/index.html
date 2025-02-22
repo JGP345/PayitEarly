@@ -1,24 +1,32 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Pay It Early - Loan Calculator</title>
+    <link rel="stylesheet" type="text/css" href="/css/styles.css">
 </head>
 <body>
-    <h2>Loan Calculator</h2>
-    <form action="/calculate" method="post">
-        <label>Principal Amount:</label>
-        <input type="number" name="principal" required>
-        <br>
-        <label>Interest Rate (%):</label>
-        <input type="number" name="interestRate" step="0.01" required>
-        <br>
-        <label>Months Left:</label>
-        <input type="number" name="monthsLeft" required>
-        <br>
-        <label>Extra Monthly Payment:</label>
-        <input type="number" name="extraPayment" step="0.01">
-        <br>
-        <button type="submit">Calculate</button>
-    </form>
+    <div class="clipboard">
+        <div class="container">
+            <h2>Loan Calculator</h2>
+            <form action="/calculate" method="post">
+                <label>Principal Amount:</label>
+                <input type="number" name="principal" required>
+                <br>
+                <label>Interest Rate (%):</label>
+                <input type="number" name="interestRate" step="0.01" required>
+                <br>
+                <label>Months Left:</label>
+                <input type="number" name="monthsLeft" required>
+                <br>
+                <label>Custom Minimum Payment (optional):</label>
+                <input type="number" name="customMinPayment" step="0.01" placeholder="Leave blank for default">
+                <br>
+                <label>Extra Monthly Payment:</label>
+                <input type="number" name="extraPayment" step="0.01" placeholder="Default: 5% of principal">
+                <br>
+                <button type="submit">Calculate</button>
+            </form>
+        </div>
+    </div>
 </body>
 </html>

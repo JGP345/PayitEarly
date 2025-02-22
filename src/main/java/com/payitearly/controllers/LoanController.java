@@ -1,5 +1,7 @@
 package com.payitearly.controllers;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,17 +27,32 @@ public class LoanController {
             @RequestParam("principal") double principal,
             @RequestParam("interestRate") double interestRate,
             @RequestParam("monthsLeft") int monthsLeft,
-            @RequestParam("extraPayment") double extraPayment,
+            @RequestParam(value = "extraPayment", defaultValue = "0") double extraPayment,
+            @RequestParam(value = "customMinPayment", defaultValue = "0") double customMinPayment,
             Model model) {
 
+        if (extraPayment == 0) {
+            extraPayment = principal * 0.05; // Default 5% of loan amount
+        }
+
         double monthlyPayment = loanService.calculateMonthlyPayment(principal, interestRate, monthsLeft);
-        double newMonthlyPayment = monthlyPayment + extraPayment;
-        double totalInterestSaved = loanService.calculateInterestSaved(principal, interestRate, monthsLeft, extraPayment);
+        double effectiveMinPayment = customMinPayment > 0 ? customMinPayment : monthlyPayment;
+        double newMonthlyPayment = effectiveMinPayment + extraPayment;
+        double totalInterestSaved = loanService.calculateInterestSaved(principal, interestRate, monthsLeft, extraPayment, customMinPayment);
+        int payoffMonths = loanService.calculatePayoffMonths(principal, interestRate, monthsLeft, extraPayment, customMinPayment);
+        double[] savingsBreakdown = loanService.calculateWeeklyBiweeklySavings(principal, interestRate, monthsLeft, extraPayment, customMinPayment);
+        List<double[]> incrementalSavings = loanService.calculateIncrementalSavings(principal, interestRate, monthsLeft, monthlyPayment, customMinPayment);
 
         model.addAttribute("monthlyPayment", monthlyPayment);
+        model.addAttribute("effectiveMinPayment", effectiveMinPayment);
         model.addAttribute("newMonthlyPayment", newMonthlyPayment);
         model.addAttribute("totalInterestSaved", totalInterestSaved);
-        
+        model.addAttribute("payoffMonths", payoffMonths);
+        model.addAttribute("monthlySavings", savingsBreakdown[0]);
+        model.addAttribute("biweeklySavings", savingsBreakdown[1]);
+        model.addAttribute("weeklySavings", savingsBreakdown[2]);
+        model.addAttribute("incrementalSavings", incrementalSavings);
+
         return "result";
     }
 }

@@ -1,26 +1,65 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Calculation Results</title>
-    <script>
-        function downloadResults() {
-            const element = document.createElement('a');
-            const text = `Loan Calculation Result\nOriginal Monthly Payment: $${document.getElementById('monthlyPayment').innerText}\nNew Monthly Payment: $${document.getElementById('newMonthlyPayment').innerText}\nTotal Interest Saved: $${document.getElementById('totalInterestSaved').innerText}`;
-            const file = new Blob([text], { type: 'text/plain' });
-            element.href = URL.createObjectURL(file);
-            element.download = 'loan_results.txt';
-            document.body.appendChild(element);
-            element.click();
-            document.body.removeChild(element);
-        }
-    </script>
+    <link rel="stylesheet" type="text/css" href="/css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <h2>Loan Calculation Result</h2>
-    <p>Original Monthly Payment: $<span id="monthlyPayment" th:text="${monthlyPayment}"></span></p>
-    <p>New Monthly Payment: $<span id="newMonthlyPayment" th:text="${newMonthlyPayment}"></span></p>
-    <p>Total Interest Saved: $<span id="totalInterestSaved" th:text="${totalInterestSaved}"></span></p>
-    <button onclick="downloadResults()">Download Results</button>
-    <a href="/">Back</a>
+    <div class="clipboard">
+        <div class="container">
+            <h2>Loan Calculation Report</h2>
+            <p>Calculated Minimum Payment: $<span th:text="${monthlyPayment}"></span></p>
+            <p>Effective Minimum Payment: $<span th:text="${effectiveMinPayment}"></span></p>
+            <p>New Monthly Payment (with extra): $<span th:text="${newMonthlyPayment}"></span></p>
+            <p>Payoff Time: <span th:text="${payoffMonths} + ' months'"></span></p>
+            <p>Total Interest Saved (Monthly): $<span th:text="${monthlySavings}"></span></p>
+            <p>Total Interest Saved (Biweekly): $<span th:text="${biweeklySavings}"></span></p>
+            <p>Total Interest Saved (Weekly): $<span th:text="${weeklySavings}"></span></p>
+
+            <h3>Incremental Savings</h3>
+            <ul>
+                <li th:each="saving : ${incrementalSavings}">
+                    Extra $<span th:text="${saving[0]}"></span>: Saves $<span th:text="${saving[1]}"></span>
+                </li>
+            </ul>
+
+            <canvas id="loanChart" width="400" height="200"></canvas>
+            <a href="/">Back</a>
+        </div>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('loanChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: Array.from({length: [[${payoffMonths}]]}, (_, i) => i + 1),
+                datasets: [{
+                    label: 'Loan Balance',
+                    data: (function() {
+                        let principal = [[${principal}]];
+                        const monthlyRate = [[${interestRate}]] / 100 / 12;
+                        const payment = [[${newMonthlyPayment}]];
+                        let balance = [];
+                        for (let i = 0; i < [[${payoffMonths}]] && principal > 0; i++) {
+                            let interest = principal * monthlyRate;
+                            principal = principal + interest - payment;
+                            balance.push(principal > 0 ? principal : 0);
+                        }
+                        return balance;
+                    })(),
+                    borderColor: '#28a745',
+                    fill: false
+                }]
+            },
+            options: {
+                scales: {
+                    x: { title: { display: true, text: 'Months' } },
+                    y: { title: { display: true, text: 'Balance ($)' } }
+                }
+            }
+        });
+    </script>
 </body>
 </html>
