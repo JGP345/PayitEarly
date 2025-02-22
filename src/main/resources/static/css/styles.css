@@ -98,3 +98,24 @@ a:hover {
         width: 90%;
     }
 }
+
+.highlight {
+    font-weight: bold;
+    padding: 2px 5px;
+    border-radius: 3px;
+}
+
+.green {
+    background-color: #e6ffe6;
+    color: #28a745;
+}
+
+.blue {
+    background-color: #e6f0ff;
+    color: #007bff;
+}
+
+.orange {
+    background-color: #fff3e6;
+    color: #ff8c00;
+}

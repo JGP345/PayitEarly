@@ -12,7 +12,8 @@ public class LoanService {
 
     public double calculateMonthlyPayment(double principal, double interestRate, int monthsLeft) {
         double monthlyRate = interestRate / 100 / 12;
-        return Double.parseDouble(df.format((principal * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -monthsLeft))));
+        double payment = (principal * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -monthsLeft));
+        return Double.parseDouble(df.format(payment));
     }
 
     public double calculateInterestSaved(double principal, double interestRate, int monthsLeft, double extraPayment, double customMinPayment) {
@@ -22,35 +23,41 @@ public class LoanService {
     }
 
     public int calculatePayoffMonths(double principal, double interestRate, int monthsLeft, double extraPayment, double customMinPayment) {
-        double monthlyRate = interestRate / 100 / 12;
+        double dailyRate = interestRate / 100 / 365;
         double payment = (customMinPayment > 0 ? customMinPayment : calculateMonthlyPayment(principal, interestRate, monthsLeft)) + extraPayment;
-        int months = 0;
-        while (principal > 0 && months < monthsLeft * 2) { // Safety cap
-            double interest = principal * monthlyRate;
-            principal = principal + interest - payment;
-            months++;
+        int days = 0;
+        while (principal > 0 && days < monthsLeft * 31 * 2) { // Safety cap
+            double interest = principal * dailyRate;
+            principal += interest;
+            if (days % 30 == 0) { // Monthly payment
+                principal -= payment;
+            }
+            days++;
         }
-        return principal <= 0 ? months : monthsLeft;
+        return (int) Math.ceil(days / 30.0); // Convert days to months
     }
 
-    public double[] calculateWeeklyBiweeklySavings(double principal, double interestRate, int monthsLeft, double extraPayment, double customMinPayment) {
-        double monthlyRate = interestRate / 100 / 12;
+    public double[] calculatePaymentFrequencySavings(double principal, double interestRate, int monthsLeft, double extraPayment, double customMinPayment) {
+        double dailyRate = interestRate / 100 / 365;
         double basePayment = customMinPayment > 0 ? customMinPayment : calculateMonthlyPayment(principal, interestRate, monthsLeft);
+        double totalPayment = basePayment + extraPayment;
 
         // Monthly: 1 payment per month
-        double monthlyInterestSaved = calculateInterestSaved(principal, interestRate, monthsLeft, extraPayment, customMinPayment);
+        double monthlyInterest = computeTotalInterest(principal, interestRate, monthsLeft, extraPayment, customMinPayment);
+        double originalMonthlyInterest = computeTotalInterest(principal, interestRate, monthsLeft, 0, customMinPayment);
+        double monthlyInterestSaved = originalMonthlyInterest - monthlyInterest;
 
-        // Biweekly: 26 payments per year (approx 2 per month)
-        double biweeklyPayment = (basePayment + extraPayment) / 2;
-        double biweeklyTotalInterest = computeTotalInterestWithFrequency(principal, monthlyRate, monthsLeft * 12 / 26, biweeklyPayment, 26.0 / 12);
-        double originalBiweeklyInterest = computeTotalInterestWithFrequency(principal, monthlyRate, monthsLeft * 12 / 26, basePayment / 2, 26.0 / 12);
-        double biweeklyInterestSaved = originalBiweeklyInterest - biweeklyTotalInterest;
+        // Biweekly: Split monthly payment into 2 biweekly payments
+        double biweeklyPayment = totalPayment / 2;
+        double biweeklyInterest = computeTotalInterestWithFrequency(principal, dailyRate, monthsLeft * 2, biweeklyPayment, 14); // 14 days
+        double originalBiweeklyInterest = computeTotalInterestWithFrequency(principal, dailyRate, monthsLeft * 2, basePayment / 2, 14);
+        double biweeklyInterestSaved = originalBiweeklyInterest - biweeklyInterest;
 
-        // Weekly: 52 payments per year (approx 4 per month)
-        double weeklyPayment = (basePayment + extraPayment) / 4;
-        double weeklyTotalInterest = computeTotalInterestWithFrequency(principal, monthlyRate, monthsLeft * 12 / 52, weeklyPayment, 52.0 / 12);
-        double originalWeeklyInterest = computeTotalInterestWithFrequency(principal, monthlyRate, monthsLeft * 12 / 52, basePayment / 4, 52.0 / 12);
-        double weeklyInterestSaved = originalWeeklyInterest - weeklyTotalInterest;
+        // Weekly: Split monthly payment into 4 weekly payments
+        double weeklyPayment = totalPayment / 4;
+        double weeklyInterest = computeTotalInterestWithFrequency(principal, dailyRate, monthsLeft * 4, weeklyPayment, 7); // 7 days
+        double originalWeeklyInterest = computeTotalInterestWithFrequency(principal, dailyRate, monthsLeft * 4, basePayment / 4, 7);
+        double weeklyInterestSaved = originalWeeklyInterest - weeklyInterest;
 
         return new double[] { monthlyInterestSaved, biweeklyInterestSaved, weeklyInterestSaved };
     }
@@ -68,27 +75,33 @@ public class LoanService {
 
     private double computeTotalInterest(double principal, double interestRate, int monthsLeft, double extraPayment, double customMinPayment) {
         double totalInterest = 0;
-        double monthlyRate = interestRate / 100 / 12;
+        double dailyRate = interestRate / 100 / 365;
         double payment = (customMinPayment > 0 ? customMinPayment : calculateMonthlyPayment(principal, interestRate, monthsLeft)) + extraPayment;
+        double balance = principal;
 
-        for (int i = 0; i < monthsLeft && principal > 0; i++) {
-            double interest = principal * monthlyRate;
+        for (int day = 0; day < monthsLeft * 30 && balance > 0; day++) {
+            double interest = balance * dailyRate;
             totalInterest += interest;
-            double principalPayment = payment - interest;
-            principal -= principalPayment;
+            balance += interest;
+            if (day % 30 == 0) { // Monthly payment
+                balance -= payment;
+            }
         }
-        return totalInterest > 0 ? totalInterest : 0;
+        return balance < 0 ? totalInterest + balance : totalInterest; // Adjust for overpayment
     }
 
-    private double computeTotalInterestWithFrequency(double principal, double monthlyRate, int periods, double paymentPerPeriod, double periodsPerMonth) {
+    private double computeTotalInterestWithFrequency(double principal, double dailyRate, int periods, double paymentPerPeriod, int daysBetweenPayments) {
         double totalInterest = 0;
-        double periodRate = monthlyRate / periodsPerMonth; // Adjust interest rate for payment frequency
+        double balance = principal;
 
-        for (int i = 0; i < periods && principal > 0; i++) {
-            double interest = principal * periodRate;
-            totalInterest += interest;
-            principal = principal + interest - paymentPerPeriod;
+        for (int period = 0; period < periods && balance > 0; period++) {
+            for (int day = 0; day < daysBetweenPayments && balance > 0; day++) {
+                double interest = balance * dailyRate;
+                totalInterest += interest;
+                balance += interest;
+            }
+            balance -= paymentPerPeriod;
         }
-        return totalInterest > 0 ? totalInterest : 0;
+        return balance < 0 ? totalInterest + balance : totalInterest; // Adjust for overpayment
     }
 }

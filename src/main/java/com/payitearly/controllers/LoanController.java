@@ -32,22 +32,25 @@ public class LoanController {
             Model model) {
 
         if (extraPayment == 0) {
-            extraPayment = principal * 0.05; // Default 5% of loan amount
+            extraPayment = principal * 0.05;
         }
 
         double monthlyPayment = loanService.calculateMonthlyPayment(principal, interestRate, monthsLeft);
         double effectiveMinPayment = customMinPayment > 0 ? customMinPayment : monthlyPayment;
         double newMonthlyPayment = effectiveMinPayment + extraPayment;
-        double totalInterestSaved = loanService.calculateInterestSaved(principal, interestRate, monthsLeft, extraPayment, customMinPayment);
+        int originalPayoffMonths = loanService.calculatePayoffMonths(principal, interestRate, monthsLeft, 0, customMinPayment);
         int payoffMonths = loanService.calculatePayoffMonths(principal, interestRate, monthsLeft, extraPayment, customMinPayment);
-        double[] savingsBreakdown = loanService.calculateWeeklyBiweeklySavings(principal, interestRate, monthsLeft, extraPayment, customMinPayment);
+        double totalInterestSaved = loanService.calculateInterestSaved(principal, interestRate, monthsLeft, extraPayment, customMinPayment);
+        double[] savingsBreakdown = loanService.calculatePaymentFrequencySavings(principal, interestRate, monthsLeft, extraPayment, customMinPayment);
         List<double[]> incrementalSavings = loanService.calculateIncrementalSavings(principal, interestRate, monthsLeft, monthlyPayment, customMinPayment);
 
         model.addAttribute("monthlyPayment", monthlyPayment);
         model.addAttribute("effectiveMinPayment", effectiveMinPayment);
         model.addAttribute("newMonthlyPayment", newMonthlyPayment);
-        model.addAttribute("totalInterestSaved", totalInterestSaved);
+        model.addAttribute("originalPayoffMonths", originalPayoffMonths);
         model.addAttribute("payoffMonths", payoffMonths);
+        model.addAttribute("monthsSaved", originalPayoffMonths - payoffMonths);
+        model.addAttribute("totalInterestSaved", totalInterestSaved);
         model.addAttribute("monthlySavings", savingsBreakdown[0]);
         model.addAttribute("biweeklySavings", savingsBreakdown[1]);
         model.addAttribute("weeklySavings", savingsBreakdown[2]);
