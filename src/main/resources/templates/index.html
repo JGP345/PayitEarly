@@ -8,6 +8,7 @@
     <div class="clipboard">
         <div class="container">
             <h2>Loan Calculator</h2>
+            <p th:if="${error}" class="highlight orange" th:text="${error}"></p>
             <form action="/calculate" method="post">
                 <label>Principal Amount:</label>
                 <input type="number" name="principal" required>

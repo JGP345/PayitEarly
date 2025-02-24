@@ -23,16 +23,26 @@ public class LoanService {
     }
 
     public int calculatePayoffMonths(double principal, double interestRate, int monthsLeft, double extraPayment, double customMinPayment) {
+        if (principal <= 0 || interestRate < 0) {
+            throw new IllegalArgumentException("Principal and interest rate must be positive.");
+        }
         double dailyRate = interestRate / 100 / 365;
         double payment = (customMinPayment > 0 ? customMinPayment : calculateMonthlyPayment(principal, interestRate, monthsLeft)) + extraPayment;
+        if (payment <= 0) {
+            throw new IllegalArgumentException("Payment must be positive.");
+        }
         int days = 0;
-        while (principal > 0 && days < monthsLeft * 31 * 2) { // Safety cap
-            double interest = principal * dailyRate;
-            principal += interest;
+        double balance = principal;
+        while (balance > 0 && days < monthsLeft * 31 * 2) { // Safety cap
+            double interest = balance * dailyRate;
+            balance += interest;
             if (days % 30 == 0) { // Monthly payment
-                principal -= payment;
+                balance -= payment;
             }
             days++;
+        }
+        if (balance > 0) {
+            return monthsLeft; // Fallback if loan never pays off within safety cap
         }
         return (int) Math.ceil(days / 30.0); // Convert days to months
     }
