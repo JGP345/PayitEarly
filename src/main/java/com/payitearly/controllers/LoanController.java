@@ -31,50 +31,31 @@ public class LoanController {
             @RequestParam(value = "customMinPayment", defaultValue = "0") double customMinPayment,
             Model model) {
 
-        // Input validation
-        if (principal <= 0 || interestRate < 0 || monthsLeft <= 0) {
-            model.addAttribute("error", "Invalid input: Principal, interest rate, and months left must be positive.");
-            return "index"; // Return to form with error message
-        }
-
         if (extraPayment == 0) {
             extraPayment = principal * 0.05;
         }
 
-        try {
-            double monthlyPayment = loanService.calculateMonthlyPayment(principal, interestRate, monthsLeft);
-            double effectiveMinPayment = customMinPayment > 0 ? customMinPayment : monthlyPayment;
-            if (effectiveMinPayment <= 0) {
-                model.addAttribute("error", "Minimum payment must be positive.");
-                return "index";
-            }
-            double newMonthlyPayment = effectiveMinPayment + extraPayment;
-            int originalPayoffMonths = loanService.calculatePayoffMonths(principal, interestRate, monthsLeft, 0, customMinPayment);
-            int payoffMonths = loanService.calculatePayoffMonths(principal, interestRate, monthsLeft, extraPayment, customMinPayment);
-            double totalInterestSaved = loanService.calculateInterestSaved(principal, interestRate, monthsLeft, extraPayment, customMinPayment);
-            double originalTotalCost = principal + loanService.computeTotalInterest(principal, interestRate, originalPayoffMonths, 0, customMinPayment);
-            double newTotalCost = principal + loanService.computeTotalInterest(principal, interestRate, payoffMonths, extraPayment, customMinPayment);
-            double totalMoneySaved = originalTotalCost - newTotalCost;
-            double[] savingsBreakdown = loanService.calculatePaymentFrequencySavings(principal, interestRate, monthsLeft, extraPayment, customMinPayment);
-            List<double[]> incrementalSavings = loanService.calculateIncrementalSavings(principal, interestRate, monthsLeft, monthlyPayment, customMinPayment);
+        double monthlyPayment = loanService.calculateMonthlyPayment(principal, interestRate, monthsLeft);
+        double effectiveMinPayment = customMinPayment > 0 ? customMinPayment : monthlyPayment;
+        double newMonthlyPayment = effectiveMinPayment + extraPayment;
+        int originalPayoffMonths = loanService.calculatePayoffMonths(principal, interestRate, monthsLeft, 0, customMinPayment);
+        int payoffMonths = loanService.calculatePayoffMonths(principal, interestRate, monthsLeft, extraPayment, customMinPayment);
+        double totalInterestSaved = loanService.calculateInterestSaved(principal, interestRate, monthsLeft, extraPayment, customMinPayment);
+        double[] savingsBreakdown = loanService.calculatePaymentFrequencySavings(principal, interestRate, monthsLeft, extraPayment, customMinPayment);
+        List<double[]> incrementalSavings = loanService.calculateIncrementalSavings(principal, interestRate, monthsLeft, monthlyPayment, customMinPayment);
 
-            model.addAttribute("monthlyPayment", monthlyPayment);
-            model.addAttribute("effectiveMinPayment", effectiveMinPayment);
-            model.addAttribute("newMonthlyPayment", newMonthlyPayment);
-            model.addAttribute("originalPayoffMonths", originalPayoffMonths);
-            model.addAttribute("payoffMonths", payoffMonths);
-            model.addAttribute("monthsSaved", originalPayoffMonths - payoffMonths);
-            model.addAttribute("totalInterestSaved", totalInterestSaved);
-            model.addAttribute("totalMoneySaved", totalMoneySaved);
-            model.addAttribute("monthlySavings", savingsBreakdown[0]);
-            model.addAttribute("biweeklySavings", savingsBreakdown[1]);
-            model.addAttribute("weeklySavings", savingsBreakdown[2]);
-            model.addAttribute("incrementalSavings", incrementalSavings);
+        model.addAttribute("monthlyPayment", monthlyPayment);
+        model.addAttribute("effectiveMinPayment", effectiveMinPayment);
+        model.addAttribute("newMonthlyPayment", newMonthlyPayment);
+        model.addAttribute("originalPayoffMonths", originalPayoffMonths);
+        model.addAttribute("payoffMonths", payoffMonths);
+        model.addAttribute("monthsSaved", originalPayoffMonths - payoffMonths);
+        model.addAttribute("totalInterestSaved", totalInterestSaved);
+        model.addAttribute("monthlySavings", savingsBreakdown[0]);
+        model.addAttribute("biweeklySavings", savingsBreakdown[1]);
+        model.addAttribute("weeklySavings", savingsBreakdown[2]);
+        model.addAttribute("incrementalSavings", incrementalSavings);
 
-            return "result";
-        } catch (Exception e) {
-            model.addAttribute("error", "An error occurred: " + e.getMessage());
-            return "index"; // Return to form with error message
-        }
+        return "result";
     }
 }
