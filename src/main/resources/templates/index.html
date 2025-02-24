@@ -11,19 +11,19 @@
             <p th:if="${error}" class="highlight orange" th:text="${error}"></p>
             <form action="/calculate" method="post">
                 <label>Principal Amount:</label>
-                <input type="number" name="principal" required>
+                <input type="number" name="principal" required min="0.01" step="0.01">
                 <br>
                 <label>Interest Rate (%):</label>
-                <input type="number" name="interestRate" step="0.01" required>
+                <input type="number" name="interestRate" step="0.01" required min="0">
                 <br>
                 <label>Months Left:</label>
-                <input type="number" name="monthsLeft" required>
+                <input type="number" name="monthsLeft" required min="1">
                 <br>
                 <label>Custom Minimum Payment (optional):</label>
-                <input type="number" name="customMinPayment" step="0.01" placeholder="Leave blank for default">
+                <input type="number" name="customMinPayment" step="0.01" placeholder="Leave blank for default" min="0.01">
                 <br>
                 <label>Extra Monthly Payment:</label>
-                <input type="number" name="extraPayment" step="0.01" placeholder="Default: 5% of principal">
+                <input type="number" name="extraPayment" step="0.01" placeholder="Default: 5% of principal" min="0">
                 <br>
                 <button type="submit">Calculate</button>
             </form>

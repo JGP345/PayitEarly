@@ -1,4 +1,3 @@
-/* src/main/resources/static/css/styles.css */
 body {
     background-color: #f0f0f0;
     font-family: 'Arial', sans-serif;
@@ -92,13 +91,6 @@ a:hover {
     text-decoration: underline;
 }
 
-/* Responsive Design */
-@media (max-width: 500px) {
-    .clipboard {
-        width: 90%;
-    }
-}
-
 .highlight {
     font-weight: bold;
     padding: 2px 5px;
@@ -118,4 +110,11 @@ a:hover {
 .orange {
     background-color: #fff3e6;
     color: #ff8c00;
+}
+
+/* Responsive Design */
+@media (max-width: 500px) {
+    .clipboard {
+        width: 90%;
+    }
 }
