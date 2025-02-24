@@ -41,9 +41,6 @@ public class LoanController {
         int originalPayoffMonths = loanService.calculatePayoffMonths(principal, interestRate, monthsLeft, 0, customMinPayment);
         int payoffMonths = loanService.calculatePayoffMonths(principal, interestRate, monthsLeft, extraPayment, customMinPayment);
         double totalInterestSaved = loanService.calculateInterestSaved(principal, interestRate, monthsLeft, extraPayment, customMinPayment);
-        double originalTotalCost = principal + loanService.computeTotalInterest(principal, interestRate, originalPayoffMonths, 0, customMinPayment);
-        double newTotalCost = principal + loanService.computeTotalInterest(principal, interestRate, payoffMonths, extraPayment, customMinPayment);
-        double totalMoneySaved = originalTotalCost - newTotalCost;
         double[] savingsBreakdown = loanService.calculatePaymentFrequencySavings(principal, interestRate, monthsLeft, extraPayment, customMinPayment);
         List<double[]> incrementalSavings = loanService.calculateIncrementalSavings(principal, interestRate, monthsLeft, monthlyPayment, customMinPayment);
 
@@ -54,7 +51,6 @@ public class LoanController {
         model.addAttribute("payoffMonths", payoffMonths);
         model.addAttribute("monthsSaved", originalPayoffMonths - payoffMonths);
         model.addAttribute("totalInterestSaved", totalInterestSaved);
-        model.addAttribute("totalMoneySaved", totalMoneySaved);
         model.addAttribute("monthlySavings", savingsBreakdown[0]);
         model.addAttribute("biweeklySavings", savingsBreakdown[1]);
         model.addAttribute("weeklySavings", savingsBreakdown[2]);
