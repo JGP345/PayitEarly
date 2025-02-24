@@ -73,7 +73,7 @@ public class LoanService {
         return savings;
     }
 
-    private double computeTotalInterest(double principal, double interestRate, int monthsLeft, double extraPayment, double customMinPayment) {
+    public double computeTotalInterest(double principal, double interestRate, int monthsLeft, double extraPayment, double customMinPayment) {
         double totalInterest = 0;
         double dailyRate = interestRate / 100 / 365;
         double payment = (customMinPayment > 0 ? customMinPayment : calculateMonthlyPayment(principal, interestRate, monthsLeft)) + extraPayment;
@@ -90,7 +90,7 @@ public class LoanService {
         return balance < 0 ? totalInterest + balance : totalInterest; // Adjust for overpayment
     }
 
-    private double computeTotalInterestWithFrequency(double principal, double dailyRate, int periods, double paymentPerPeriod, int daysBetweenPayments) {
+    public double computeTotalInterestWithFrequency(double principal, double dailyRate, int periods, double paymentPerPeriod, int daysBetweenPayments) {
         double totalInterest = 0;
         double balance = principal;
 
