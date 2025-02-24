@@ -15,15 +15,11 @@
             <p>Original Payoff Time: <span th:text="${originalPayoffMonths} + ' months'"></span></p>
             <p>Payoff Time: <span class="highlight green" th:text="${payoffMonths} + ' months'"></span> 
                 (<span class="highlight orange" th:text="'Saves ' + ${monthsSaved} + ' months'"></span>)</p>
-<<<<<<< HEAD
             <p>Total Interest Saved (Monthly Extra): <span class="highlight green" th:text="'$' + ${monthlySavings}"></span></p>
             <p>Total Interest Saved (Biweekly Split): <span class="highlight blue" th:text="'$' + ${biweeklySavings}"></span></p>
             <p>Total Interest Saved (Weekly Split): <span class="highlight orange" th:text="'$' + ${weeklySavings}"></span></p>
             <p>Total Money Saved by Paying Early: <span class="highlight green" th:text="'$' + ${totalMoneySaved}"></span></p>
 
-=======
-            
->>>>>>> 93c93e9332f77f84f8f866ea68ab04cc205c784c
             <h3>Incremental Savings (Monthly Extra)</h3>
             <ul>
                 <li th:each="saving : ${incrementalSavings}">
