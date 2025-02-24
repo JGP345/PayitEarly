@@ -62,19 +62,19 @@ public class LoanService {
         double totalPayment = basePayment + extraPayment;
 
         // Monthly: 1 payment per month
-        double monthlyInterest = computeTotalInterest(principal, interestRate, monthsLeft, extraPayment, customMinPayment);
+        double monthlyInterest =.computeTotalInterest(principal, interestRate, monthsLeft, extraPayment, customMinPayment);
         double originalMonthlyInterest = computeTotalInterest(principal, interestRate, monthsLeft, 0, customMinPayment);
         double monthlyInterestSaved = originalMonthlyInterest - monthlyInterest;
 
-        // Biweekly: Split monthly payment into 2 biweekly payments (14 days)
+        // Biweekly: Split monthly payment into 2 biweekly payments
         double biweeklyPayment = totalPayment / 2;
-        double biweeklyInterest = computeTotalInterestWithFrequency(principal, dailyRate, monthsLeft * 2, biweeklyPayment, 14);
+        double biweeklyInterest = computeTotalInterestWithFrequency(principal, dailyRate, monthsLeft * 2, biweeklyPayment, 14); // 14 days
         double originalBiweeklyInterest = computeTotalInterestWithFrequency(principal, dailyRate, monthsLeft * 2, basePayment / 2, 14);
         double biweeklyInterestSaved = originalBiweeklyInterest - biweeklyInterest;
 
-        // Weekly: Split monthly payment into 4 weekly payments (7 days)
+        // Weekly: Split monthly payment into 4 weekly payments
         double weeklyPayment = totalPayment / 4;
-        double weeklyInterest = computeTotalInterestWithFrequency(principal, dailyRate, monthsLeft * 4, weeklyPayment, 7);
+        double weeklyInterest = computeTotalInterestWithFrequency(principal, dailyRate, monthsLeft * 4, weeklyPayment, 7); // 7 days
         double originalWeeklyInterest = computeTotalInterestWithFrequency(principal, dailyRate, monthsLeft * 4, basePayment / 4, 7);
         double weeklyInterestSaved = originalWeeklyInterest - weeklyInterest;
 

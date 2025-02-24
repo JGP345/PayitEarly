@@ -6,6 +6,68 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <h1>Hello World</h1>
+    <div class="clipboard">
+        <div class="container">
+            <h2>Loan Calculation Report</h2>
+            <p>Calculated Minimum Payment: $<span th:text="${monthlyPayment}"></span></p>
+            <p>Effective Minimum Payment: $<span th:text="${effectiveMinPayment}"></span></p>
+            <p>New Monthly Payment (with extra): $<span th:text="${newMonthlyPayment}"></span></p>
+            <p>Original Payoff Time: <span th:text="${originalPayoffMonths} + ' months'"></span></p>
+            <p>Payoff Time: <span class="highlight green" th:text="${payoffMonths} + ' months'"></span> 
+                (<span class="highlight orange" th:text="'Saves ' + ${monthsSaved} + ' months'"></span>)</p>
+            <p>Total Interest Saved (Monthly Extra): <span class="highlight green" th:text="'$' + ${monthlySavings}"></span></p>
+            <p>Total Interest Saved (Biweekly Split): <span class="highlight blue" th:text="'$' + ${biweeklySavings}"></span></p>
+            <p>Total Interest Saved (Weekly Split): <span class="highlight orange" th:text="'$' + ${weeklySavings}"></span></p>
+            <p>Total Money Saved by Paying Early: <span class="highlight green" th:text="'$' + ${totalMoneySaved}"></span></p>
+
+            <h3>Incremental Savings (Monthly Extra)</h3>
+            <ul>
+                <li th:each="saving : ${incrementalSavings}">
+                    Extra $<span th:text="${#numbers.formatInteger(saving[0])}"></span>: Saves <span class="highlight green" th:text="'$' + ${saving[1]}"></span>
+                </li>
+            </ul>
+
+            <canvas id="loanChart" width="400" height="200"></canvas>
+            <a href="/">Back</a>
+        </div>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('loanChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: Array.from({length: [[${payoffMonths}]]}, (_, i) => i + 1),
+                datasets: [{
+                    label: 'Loan Balance',
+                    data: (function() {
+                        let principal = [[${principal}]];
+                        const dailyRate = [[${interestRate}]] / 100 / 365;
+                        const payment = [[${newMonthlyPayment}]];
+                        let balance = [];
+                        for (let day = 0; day < [[${payoffMonths}]] * 30 && principal > 0; day++) {
+                            let interest = principal * dailyRate;
+                            principal += interest;
+                            if (day % 30 == 0) {
+                                principal -= payment;
+                            }
+                            if (day % 30 == 0) {
+                                balance.push(principal > 0 ? principal : 0);
+                            }
+                        }
+                        return balance;
+                    })(),
+                    borderColor: '#28a745',
+                    fill: false
+                }]
+            },
+            options: {
+                scales: {
+                    x: { title: { display: true, text: 'Months' } },
+                    y: { title: { display: true, text: 'Balance ($)' } }
+                }
+            }
+        });
+    </script>
 </body>
 </html>
