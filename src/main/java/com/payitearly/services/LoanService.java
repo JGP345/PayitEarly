@@ -23,26 +23,16 @@ public class LoanService {
     }
 
     public int calculatePayoffMonths(double principal, double interestRate, int monthsLeft, double extraPayment, double customMinPayment) {
-        if (principal <= 0 || interestRate < 0) {
-            throw new IllegalArgumentException("Principal and interest rate must be positive.");
-        }
         double dailyRate = interestRate / 100 / 365;
         double payment = (customMinPayment > 0 ? customMinPayment : calculateMonthlyPayment(principal, interestRate, monthsLeft)) + extraPayment;
-        if (payment <= 0) {
-            throw new IllegalArgumentException("Payment must be positive.");
-        }
         int days = 0;
-        double balance = principal;
-        while (balance > 0 && days < monthsLeft * 31 * 2) { // Safety cap
-            double interest = balance * dailyRate;
-            balance += interest;
+        while (principal > 0 && days < monthsLeft * 31 * 2) { // Safety cap
+            double interest = principal * dailyRate;
+            principal += interest;
             if (days % 30 == 0) { // Monthly payment
-                balance -= payment;
+                principal -= payment;
             }
             days++;
-        }
-        if (balance > 0) {
-            return monthsLeft; // Fallback if loan never pays off within safety cap
         }
         return (int) Math.ceil(days / 30.0); // Convert days to months
     }
@@ -83,7 +73,7 @@ public class LoanService {
         return savings;
     }
 
-    public double computeTotalInterest(double principal, double interestRate, int monthsLeft, double extraPayment, double customMinPayment) {
+    private double computeTotalInterest(double principal, double interestRate, int monthsLeft, double extraPayment, double customMinPayment) {
         double totalInterest = 0;
         double dailyRate = interestRate / 100 / 365;
         double payment = (customMinPayment > 0 ? customMinPayment : calculateMonthlyPayment(principal, interestRate, monthsLeft)) + extraPayment;
@@ -100,7 +90,7 @@ public class LoanService {
         return balance < 0 ? totalInterest + balance : totalInterest; // Adjust for overpayment
     }
 
-    public double computeTotalInterestWithFrequency(double principal, double dailyRate, int periods, double paymentPerPeriod, int daysBetweenPayments) {
+    private double computeTotalInterestWithFrequency(double principal, double dailyRate, int periods, double paymentPerPeriod, int daysBetweenPayments) {
         double totalInterest = 0;
         double balance = principal;
 
